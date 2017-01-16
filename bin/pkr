@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+if [ $# -lt 1 ]
+then
+    echo "Wrong number of arguments"
+    exit
+fi
+
+# Rscripts
+init_cmd="packrat::init(); packrat::set_opts(vcs.ignore.src = TRUE)"
+
+case $1 in
+    init) Rscript -e $init_cmd
+          ;;
+    in|install) echo "Not implemented"
+                ;;
+    rm|remove) echo "Not implemented"
+               ;;
+    *) echo "Invalid option"
+       ;;
+esac
