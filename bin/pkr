@@ -16,6 +16,12 @@ case $1 in
                 ;;
     rm|remove) echo "Not implemented"
                ;;
+    run) echo "Not implemented"
+         ;;
+    test) echo "Not implemented"
+          ;;
+    lint) echo "Not implemented"
+          ;;
     *) echo "Invalid option"
        ;;
 esac
