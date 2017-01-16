@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REMOTE=${REMOTE:-git@github.com:lepisma/pkr.git}
+REMOTE=${REMOTE:-https://github.com/lepisma/pkr.git}
 DEST=${DEST:-/tmp/pkr}
 
 # List of binaries
@@ -16,6 +16,7 @@ install () {
     for bin in $BINS
     do
         cp "$DEST/bin/$bin" ./
+        chmod +x $bin
     done
     return $?
 }
