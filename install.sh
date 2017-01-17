@@ -18,14 +18,24 @@ install () {
         echo "$password" | eval "$SUDO" chmod +x "$bin"
     done
 
+    # Don't bug me!
+    MIRROR="'http://cran.us.r-project.org'"
+
     # Check for packrat installation
     Rscript -e "library(packrat)" > /dev/null 2>&1
     if [ $? -ne 0 ]
     then
         echo "+ Packrat not found. Installing..."
         # Install at default location
-        Rscript -e "install.packages('packrat', repos='http://cran.us.r-project.org')" > /dev/null 2>&1
+        Rscript -e "install.packages('packrat', repos=$MIRROR)" > /dev/null 2>&1
     fi
+
+    # Install other dependencies
+    echo "+ Installing pkr dependencies..."
+    # Turn off packrat in case we are in a packrat project
+    Rscript -e "packrat::off()" > /dev/null 2>&1
+    Rscript -e "install.packages('devtools', repos=$MIRROR)" > /dev/null 2>&1
+    Rscript -e "library(devtools); install_github('docopt/docopt.R')" > /dev/null 2>&1
     return $?
 }
 

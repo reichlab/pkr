@@ -1,27 +1,85 @@
-#!/usr/bin/env bash
+#!/usr/bin/env Rscript
 
-if [ $# -lt 1 ]
-then
-    echo "Wrong number of arguments"
-    exit
-fi
+"pkr :: Opinionated set of tools for working with R
 
-# Rscripts
-init_cmd="packrat::init(); packrat::set_opts(vcs.ignore.src = TRUE)"
+Usage:
+  pkr init
+  pkr (in | install) <inpkg>...
+  pkr (rm | remove) <rmpkg>...
+  pkr clean
+  pkr run
+  pkr test
+  pkr lint
+  pkr -h | --help
 
-case $1 in
-    init) Rscript -e $init_cmd
-          ;;
-    in|install) echo "Not implemented"
-                ;;
-    rm|remove) echo "Not implemented"
-               ;;
-    run) echo "Not implemented"
-         ;;
-    test) echo "Not implemented"
-          ;;
-    lint) echo "Not implemented"
-          ;;
-    *) echo "Invalid option"
-       ;;
-esac
+Arguments:
+  init             Initialize packrat project
+  in, install      Install packages
+  rm, remove       Remove packages
+  clean            Remove unused packages
+  run              Run script (Not Implemented)
+  test             Run tests
+  lint             Lint *.R files
+
+Options:
+  -h --help        Print this help" -> doc
+
+# Use globally installed docopt
+packrat::off()
+opts <- docopt::docopt(doc)
+
+# Don't bug me!
+mirror <- "http://cran.us.r-project.org"
+
+#' Check if in a packrat project, exit if not
+#' Turn on packrat mode
+check_packrat <- function() {
+  if (!file.exists("./packrat")) {
+    stop("Not in a packrat project. Run `pkr init` first.")
+  } else {
+    packrat::on()
+  }
+}
+
+#' Install package if not found
+check_install <- function(package_name) {
+  if (!require(package_name, character.only = TRUE)) {
+    print(paste0(package_name, " not found in the project. Installing..."))
+    install.packages(package_name, repos = mirror, quiet = TRUE)
+  }
+}
+
+# Entry point
+if (opts[["init"]]) {
+  # Run packrat init
+  packrat::init()
+  packrat::set_opts(vcs.ignore.src = TRUE)
+  packrat::set_opts(use.cache = TRUE)
+
+} else if (opts[["in"]] | opts[["install"]]) {
+  # Install given packages
+  check_packrat()
+  print("Installing packages...")
+  install.packages(opts[["<inpkg>"]], repos = mirror)
+
+} else if (opts[["rm"]] | opts[["remove"]]) {
+  check_packrat()
+  remove.packages(opts[["<rmpkg>"]])
+
+} else if (opts[["clean"]]) {
+  check_packrat()
+  packrat::clean()
+
+} else if (opts[["run"]]) {
+  stop("Run method not implemented")
+
+} else if (opts[["lint"]]) {
+  check_packrat()
+  check_install("lintr")
+  lintr::lint_package()
+
+} else if (opts[["test"]]) {
+  check_packrat()
+  check_install("testthat")
+  system("R CMD check")
+}
