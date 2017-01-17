@@ -4,10 +4,9 @@
 
 Usage:
   pkr init
-  pkr (in | install) <inpkg>...
-  pkr (rm | remove) <rmpkg>...
+  pkr (in | install) [<inpkg>...] [--global]
+  pkr (rm | remove) <rmpkg>... [--global]
   pkr clean
-  pkr run
   pkr test
   pkr lint
   pkr -h | --help
@@ -17,11 +16,11 @@ Arguments:
   in, install      Install packages
   rm, remove       Remove packages
   clean            Remove unused packages
-  run              Run script (Not Implemented)
   test             Run tests
   lint             Lint *.R files
 
 Options:
+  -global          Use global package installation location
   -h --help        Print this help" -> doc
 
 # Use globally installed docopt
@@ -44,7 +43,7 @@ check_packrat <- function() {
 #' Install package if not found
 check_install <- function(package_name) {
   if (!require(package_name, character.only = TRUE)) {
-    print(paste0(package_name, " not found in the project. Installing..."))
+    cat(paste0(package_name, " not found. Installing...\n"))
     install.packages(package_name, repos = mirror, quiet = TRUE)
   }
 }
@@ -58,28 +57,39 @@ if (opts[["init"]]) {
 
 } else if (opts[["in"]] | opts[["install"]]) {
   # Install given packages
-  check_packrat()
-  print("Installing packages...")
-  install.packages(opts[["<inpkg>"]], repos = mirror)
+  if (opts[["--global"]]) {
+    packrat::off()
+    cat("Using global path\n")
+    if (length(opts[["<inpkg>"]]) == 0) {
+      stop("Provide at least one package")
+    }
+  } else {
+    check_packrat()
+  }
+  if (length(opts[["<inpkg>"]]) == 0) {
+    packrat::init()
+  } else {
+    install.packages(opts[["<inpkg>"]], repos = mirror)
+  }
 
 } else if (opts[["rm"]] | opts[["remove"]]) {
-  check_packrat()
+  if (opts[["--global"]]) {
+    packrat::off()
+    cat("Using global path\n")
+  } else {
+    check_packrat()
+  }
   remove.packages(opts[["<rmpkg>"]])
 
 } else if (opts[["clean"]]) {
   check_packrat()
   packrat::clean()
 
-} else if (opts[["run"]]) {
-  stop("Run method not implemented")
-
 } else if (opts[["lint"]]) {
-  check_packrat()
   check_install("lintr")
   lintr::lint_package()
 
 } else if (opts[["test"]]) {
-  check_packrat()
   check_install("testthat")
   system("R CMD check")
 }
