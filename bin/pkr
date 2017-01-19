@@ -83,8 +83,10 @@ if (opts[["init"]]) {
       devtools::install_github(github_package)
     }
 
-    # Install regular CRAN packages
-    install.packages(opts[["<inpkg>"]][!github_indices], repos = mirror)
+    if (length(opts[["<inpkg>"]][!github_indices]) > 0) {
+      # Install regular CRAN packages
+      install.packages(opts[["<inpkg>"]][!github_indices], repos = mirror)
+    }
   }
 
 } else if (opts[["rm"]] | opts[["remove"]]) {
