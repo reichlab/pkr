@@ -57,6 +57,9 @@ if (opts[["init"]]) {
   packrat::set_opts(vcs.ignore.src = TRUE)
   packrat::set_opts(use.cache = TRUE)
 
+  # Install devtools locally for github packages
+  install.packages("devtools", repos = mirror)
+
 } else if (opts[["in"]] | opts[["install"]]) {
   # Install given packages
   if (opts[["--global"]]) {
@@ -71,7 +74,17 @@ if (opts[["init"]]) {
   if (length(opts[["<inpkg>"]]) == 0) {
     packrat::init()
   } else {
-    install.packages(opts[["<inpkg>"]], repos = mirror)
+
+    # Packages to be installed from github
+    github_indices <- sapply(opts[["<inpkg>"]], function(p) {
+      length(strsplit(p, "/")[[1]]) > 1
+    })
+    for (github_package in opts[["<inpkg>"]][github_indices]) {
+      devtools::install_github(github_package)
+    }
+
+    # Install regular CRAN packages
+    install.packages(opts[["<inpkg>"]][!github_indices], repos = mirror)
   }
 
 } else if (opts[["rm"]] | opts[["remove"]]) {
