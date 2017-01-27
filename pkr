@@ -81,7 +81,7 @@ if (opts[["init"]]) {
 
       ## Check if its installed
       if (length(splits) > 1) {
-        return !require(splits[2])
+        !require(splits[2])
       } else {
         FALSE
       }
