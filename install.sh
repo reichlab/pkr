@@ -14,7 +14,7 @@ install () {
     cd "$PREFIX"
     for bin in "$BINS"
     do
-        echo "$password" | eval "$SUDO" cp "$CLONED/bin/$bin" ./
+        echo "$password" | eval "$SUDO" cp "$CLONED/$bin" ./
         echo "$password" | eval "$SUDO" chmod +x "$bin"
     done
 

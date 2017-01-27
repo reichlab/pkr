@@ -25,11 +25,11 @@ Options:
   -global          Use global package installation location
   -h --help        Print this help" -> doc
 
-# Use globally installed docopt
+## Use globally installed docopt
 packrat::off()
 opts <- docopt::docopt(doc)
 
-# Don't bug me!
+## Don't bug me!
 mirror <- "http://cran.us.r-project.org"
 
 #' Check if in a packrat project, exit if not
@@ -50,18 +50,18 @@ check_install <- function(package_name) {
   }
 }
 
-# Entry point
+## Entry point
 if (opts[["init"]]) {
-  # Run packrat init
+  ## Run packrat init
   packrat::init()
   packrat::set_opts(vcs.ignore.src = TRUE)
   packrat::set_opts(use.cache = TRUE)
 
-  # Install devtools locally for github packages
+  ## Install devtools locally for github packages
   install.packages("devtools", repos = mirror)
 
 } else if (opts[["in"]] | opts[["install"]]) {
-  # Install given packages
+  ## Install given packages
   if (opts[["--global"]]) {
     packrat::off()
     cat("Using global path\n")
@@ -75,17 +75,26 @@ if (opts[["init"]]) {
     packrat::init()
   } else {
 
-    # Packages to be installed from github
+    ## Packages to be installed from github
     github_indices <- sapply(opts[["<inpkg>"]], function(p) {
-      length(strsplit(p, "/")[[1]]) > 1
+      splits <- strsplit(p, "/")[[1]]
+
+      ## Check if its installed
+      if (length(splits) > 1) {
+        return !require(splits[2])
+      } else {
+        FALSE
+      }
     })
     for (github_package in opts[["<inpkg>"]][github_indices]) {
       devtools::install_github(github_package)
     }
 
-    if (length(opts[["<inpkg>"]][!github_indices]) > 0) {
-      # Install regular CRAN packages
-      install.packages(opts[["<inpkg>"]][!github_indices], repos = mirror)
+    rest_packages <- opts[["<inpkg>"]][!github_indices]
+    if (length(rest_packages) > 0) {
+      ## Install regular CRAN packages
+      cran_indices <- !sapply(rest_packages, require, character.only = TRUE)
+      install.packages(rest_packages[cran_indices], repos = mirror)
     }
   }
 
