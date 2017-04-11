@@ -39,7 +39,7 @@ Arguments:
   save             Save script in pkr bin
 
 Options:
-  -global          Use global package installation location
+  --global         Use global package installation location
   -h --help        Print this help
   -v --version     Show version number
 ```
