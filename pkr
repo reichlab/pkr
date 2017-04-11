@@ -100,7 +100,10 @@ if (opts[["init"]]) {
     if (length(rest_packages) > 0) {
       ## Install regular CRAN packages
       cran_indices <- !sapply(rest_packages, require, character.only = TRUE)
-      install.packages(rest_packages[cran_indices], repos = mirror)
+      rest_packages <- rest_packages[cran_indices]
+      if (length(rest_packages) > 0) {
+        install.packages(rest_packages[cran_indices], repos = mirror)
+      }
     }
   }
 
