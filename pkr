@@ -31,7 +31,7 @@ Options:
 
 ## Use globally installed docopt
 packrat::off()
-opts <- docopt::docopt(doc, version = "v0.1.1")
+opts <- docopt::docopt(doc, version = "v0.1.3")
 
 ## Don't bug me!
 mirror <- "http://cran.us.r-project.org"
