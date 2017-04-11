@@ -12,6 +12,7 @@ Usage:
   pkr lint
   pkr create <script>
   pkr -h | --help
+  pkr -v | --version
 
 Arguments:
   init             Initialize packrat project
@@ -25,11 +26,12 @@ Arguments:
 
 Options:
   -global          Use global package installation location
-  -h --help        Print this help" -> doc
+  -h --help        Print this help
+  -v --version     Show version number" -> doc
 
 ## Use globally installed docopt
 packrat::off()
-opts <- docopt::docopt(doc)
+opts <- docopt::docopt(doc, version = "v0.1.1")
 
 ## Don't bug me!
 mirror <- "http://cran.us.r-project.org"
