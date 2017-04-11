@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-"pkr :: Opinionated set of tools for working with R
+"pkr :: opinionated set of tools for working with R
 
 Usage:
   pkr init
@@ -11,6 +11,7 @@ Usage:
   pkr test
   pkr lint
   pkr create <script>
+  pkr save <script>
   pkr -h | --help
   pkr -v | --version
 
@@ -23,6 +24,7 @@ Arguments:
   test             Run tests
   lint             Lint *.R files
   create           Create a runnable R script stub with docopt
+  save             Save script in pkr bin
 
 Options:
   -global          Use global package installation location
@@ -34,7 +36,8 @@ packrat::off()
 opts <- docopt::docopt(doc, version = "v0.1.3")
 
 ## Don't bug me!
-mirror <- "http://cran.us.r-project.org"
+default_mirror <- "http://cran.us.r-project.org"
+pkr_bin_path <- "~/.pkr/bin"
 
 #' Check if in a packrat project, exit if not
 #' Turn on packrat mode
@@ -47,7 +50,7 @@ check_packrat <- function() {
 }
 
 #' Install package if not found
-check_install <- function(package_name, mirror = mirror) {
+check_install <- function(package_name, mirror = default_mirror) {
   if (!require(package_name, character.only = TRUE)) {
     cat(paste0(package_name, " not found. Installing...\n"))
     install.packages(package_name, repos = mirror, quiet = TRUE)
@@ -58,6 +61,18 @@ init_packrat <- function() {
   packrat::set_opts(vcs.ignore.src = TRUE)
   packrat::set_opts(use.cache = TRUE)
   packrat::init()
+}
+
+#' Setup bin directory for packrat
+setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
+  if (!dir.exists(pkr_bin)) {
+    cat("Setting up pkr bin directory...\n")
+    dir.create(pkr_bin, showWarnings = FALSE, recursive = TRUE)
+    oldwd <- getwd()
+    setwd(pkr_bin_path)
+    init_packrat()
+    setwd(oldwd)
+  }
 }
 
 ## Entry point
@@ -115,19 +130,15 @@ if (opts[["init"]]) {
     check_packrat()
   }
   remove.packages(opts[["<rmpkg>"]])
-
 } else if (opts[["status"]]) {
   check_packrat()
   packrat::status()
-
 } else if (opts[["clean"]]) {
   check_packrat()
   packrat::clean()
-
 } else if (opts[["lint"]]) {
   check_install("lintr")
   lintr::lint_package()
-
 } else if (opts[["test"]]) {
   check_install("testthat")
   system("R CMD check")
@@ -141,4 +152,22 @@ if (opts[["init"]]) {
     "opts <- docopt::docopt(doc)"
   )
   writeLines(stub, name)
+} else if (opts[["save"]]) {
+  ## Save the given script as an executable
+  setup_pkr_bin()
+
+  source_file <- opts[["<script>"]]
+  script_name <- basename(source_file)
+  target_file <- file.path(pkr_bin_path, script_name)
+  file.copy(from = source_file, to = target_file, overwrite = TRUE)
+  Sys.chmod(target_file, mode = "755")
+
+  ## Create symlink for short name
+  setwd(pkr_bin_path)
+  short_name <- sub("^([^.]*).*", "\\1", script_name)
+  if (!file.exists(short_name)) {
+    file.symlink(source_file, short_name)
+  }
+  ## Install deps
+  init_packrat()
 }
