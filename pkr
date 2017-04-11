@@ -43,23 +43,25 @@ check_packrat <- function() {
 }
 
 #' Install package if not found
-check_install <- function(package_name) {
+check_install <- function(package_name, mirror = mirror) {
   if (!require(package_name, character.only = TRUE)) {
     cat(paste0(package_name, " not found. Installing...\n"))
     install.packages(package_name, repos = mirror, quiet = TRUE)
   }
 }
 
+init_packrat <- function() {
+  packrat::set_opts(vcs.ignore.src = TRUE)
+  packrat::set_opts(use.cache = TRUE)
+  packrat::init()
+}
+
 ## Entry point
 if (opts[["init"]]) {
   ## Run packrat init
-  packrat::init()
-  packrat::set_opts(vcs.ignore.src = TRUE)
-  packrat::set_opts(use.cache = TRUE)
-
+  init_packrat()
   ## Install devtools locally for github packages
   install.packages("devtools", repos = mirror)
-
 } else if (opts[["in"]] | opts[["install"]]) {
   ## Install given packages
   if (opts[["--global"]]) {
@@ -72,9 +74,9 @@ if (opts[["init"]]) {
     check_packrat()
   }
   if (length(opts[["<inpkg>"]]) == 0) {
-    packrat::init()
-  } else {
+    init_packrat()
 
+  } else {
     ## Packages to be installed from github
     github_indices <- sapply(opts[["<inpkg>"]], function(p) {
       splits <- strsplit(p, "/")[[1]]
