@@ -10,21 +10,23 @@ Usage:
   pkr clean
   pkr test
   pkr lint
-  pkr create <script>
-  pkr save <script>
+  pkr script (in | install) <script>
+  pkr script (ls | list) <script>
+  pkr script (rm | remove) <script>
+  pkr script new <script>
   pkr -h | --help
   pkr -v | --version
 
 Arguments:
   init             Initialize packrat project
-  in, install      Install packages
-  rm, remove       Remove packages
+  in, install      Install packages / scripts
+  rm, remove       Remove packages / scripts
+  ls, list         List installed scripts
   status           Show installed packages
   clean            Remove unused packages
   test             Run tests
   lint             Lint *.R files
-  create           Create a runnable R script stub with docopt
-  save             Save script in pkr bin
+  script           Work with Rscripts
 
 Options:
   --global         Use global package installation location
@@ -57,13 +59,14 @@ check_install <- function(package_name, mirror = default_mirror) {
   }
 }
 
+#' Initialize packrat repo with speed-ish settings
 init_packrat <- function() {
   packrat::set_opts(vcs.ignore.src = TRUE)
   packrat::set_opts(use.cache = TRUE)
   packrat::init()
 }
 
-#' Setup bin directory for packrat
+#' Setup bin directory for scripts
 setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
   if (!dir.exists(pkr_bin)) {
     cat("Setting up pkr bin directory...\n")
