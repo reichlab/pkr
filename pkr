@@ -52,10 +52,10 @@ check_packrat <- function() {
 }
 
 #' Install package if not found
-check_install <- function(package_name, mirror = default_mirror) {
+check_install <- function(package_name) {
   if (!require(package_name, character.only = TRUE)) {
     cat(paste0(package_name, " not found. Installing...\n"))
-    install.packages(package_name, repos = mirror, quiet = TRUE)
+    install.packages(package_name, repos = default_mirror, quiet = TRUE)
   }
 }
 
@@ -83,7 +83,7 @@ if (opts[["init"]]) {
   ## Run packrat init
   init_packrat()
   ## Install devtools locally for github packages
-  install.packages("devtools", repos = mirror)
+  install.packages("devtools", repos = default_mirror)
 } else if (opts[["in"]] | opts[["install"]]) {
   ## Install given packages
   if (opts[["--global"]]) {
@@ -120,7 +120,7 @@ if (opts[["init"]]) {
       cran_indices <- !sapply(rest_packages, require, character.only = TRUE)
       rest_packages <- rest_packages[cran_indices]
       if (length(rest_packages) > 0) {
-        install.packages(rest_packages[cran_indices], repos = mirror)
+        install.packages(rest_packages[cran_indices], repos = default_mirror)
       }
     }
   }
