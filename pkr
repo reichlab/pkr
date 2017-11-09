@@ -52,7 +52,7 @@ check_packrat <- function() {
 }
 
 #' Install package if not found
-check_install <- function(package_name) {
+check_and_install <- function(package_name) {
   if (!require(package_name, character.only = TRUE)) {
     cat(paste0(package_name, " not found. Installing...\n"))
     install.packages(package_name, repos = default_mirror, quiet = TRUE)
@@ -143,10 +143,10 @@ if (opts[["init"]]) {
   check_packrat()
   packrat::clean()
 } else if (opts[["lint"]]) {
-  check_install("lintr")
+  check_and_install("lintr")
   lintr::lint_package()
 } else if (opts[["test"]]) {
-  check_install("testthat")
+  check_and_install("testthat")
   system("R CMD check")
 } else if (opts[["create"]]) {
   name <- opts[["<script>"]]
