@@ -4,7 +4,7 @@
 
 Usage:
   pkr init
-  pkr (in | install) [<inpkg>...] [--global]
+  pkr (in | install) ([<inpkg>...] | [--file=<pkr-file>]) [--global]
   pkr (rm | remove) <rmpkg>... [--global]
   pkr status
   pkr clean
@@ -51,12 +51,44 @@ check_packrat <- function() {
   }
 }
 
-#' Install package if not found
-check_and_install <- function(package_name) {
-  if (!require(package_name, character.only = TRUE)) {
-    cat(paste0(package_name, " not found. Installing...\n"))
-    install.packages(package_name, repos = default_mirror, quiet = TRUE)
+#' Check if package_id is installed
+installed_p <- function(package_id) {
+  splits <- strsplit(package_id, "/")[[1]]
+  name <- if (length(splits) == 1) package_id else splits[2]
+  require(name, character.only = TRUE)
+}
+
+#' Install package given as pkr style package id
+install <- function(package_id) {
+  splits <- strsplit(package_id, "/")[[1]]
+
+  if (length(splits) == 1) {
+    ## This is plain CRAN package
+    install.packages(package_id, repos = default_mirror)
+  } else if (length(splits) == 2) {
+    ## gh package of type user/repo
+    devtools::install_github(package_id)
+  } else {
+    ## gh package of type user/repo/sub/dir
+    devtools::install_github(
+                paste(splits[1:2], collapse = "/"),
+                subdir = paste(splits[3:length(splits)], collapse = "/")
+              )
   }
+}
+
+#' Install package if not found
+check_and_install <- function(package_id) {
+  if (!installed_p(package_id)) {
+    cat(paste0(package_id, " not found. Installing...\n"))
+    install(package_id)
+  }
+}
+
+#' Get package ids from a file (allows # style comments)
+read_package_ids_from_file <- function(file_name) {
+  lines <- readLines(file_name)
+  Filter(function(x) (length(x) == 0) || (!startsWith(x, "#")), lines)
 }
 
 #' Initialize packrat repo with speed-ish settings
@@ -83,52 +115,48 @@ if (opts[["init"]]) {
   ## Run packrat init
   init_packrat()
   ## Install devtools locally for github packages
-  install.packages("devtools", repos = default_mirror)
+  check_and_install("devtools")
+
 } else if (opts[["in"]] | opts[["install"]]) {
+  if(length(opts[["--file"]]) == 1) {
+    to_install <- read_package_ids_from_file(opts[["--file"]])
+  } else {
+    to_install <- opts[["<inpkg>"]]
+  }
+
   ## Install given packages
   if (opts[["--global"]]) {
     packrat::off()
     cat("Using global path\n")
-    if (length(opts[["<inpkg>"]]) == 0) {
+    if (length(to_install) == 0) {
       stop("Provide at least one package")
     }
   } else {
     check_packrat()
   }
-  if (length(opts[["<inpkg>"]]) == 0) {
+
+  if (length(to_install) == 0) {
     init_packrat()
   } else {
     ## Packages to be installed from github
-    github_indices <- sapply(opts[["<inpkg>"]], function(p) {
+    github_indices <- sapply(to_install, function(p) {
       splits <- strsplit(p, "/")[[1]]
       return (length(splits) > 1)
     })
 
-    for (github_package in opts[["<inpkg>"]][github_indices]) {
-      splits <- strsplit(github_package, "/")[[1]]
-
+    for (github_package_id in to_install[github_indices]) {
       ## Install only if the package is not installed
-      if (!require(splits[2], character.only = TRUE)) {
-        if (length(splits) == 2) {
-          devtools::install_github(github_package)
-        } else if (length(splits) > 2) {
-          devtools::install_github(paste(splits[1:2], collapse = "/"), subdir = paste(splits[3:length(splits)], collapse = "/"))
-        }
+      if (!installed_p(github_package_id)) {
+        install(github_package_id)
       }
     }
 
-    rest_packages <- opts[["<inpkg>"]][!github_indices]
-    if (length(rest_packages) > 0) {
-      ## Install regular CRAN packages
-      cran_indices <- !sapply(rest_packages, require, character.only = TRUE)
-      rest_packages <- rest_packages[cran_indices]
-      if (length(rest_packages) > 0) {
-        install.packages(rest_packages, repos = default_mirror)
-      }
-    }
+    ## Install regular CRAN packages
+    cran_indices <- !sapply(to_install[!github_indices], installed_p)
+    sapply(to_install[!github_indices][cran_indices], install)
   }
 
-} else if (opts[["rm"]] | opts[["remove"]]) {
+ } else if (opts[["rm"]] | opts[["remove"]]) {
   if (opts[["--global"]]) {
     packrat::off()
     cat("Using global path\n")
