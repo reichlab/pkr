@@ -112,7 +112,12 @@ if (opts[["init"]]) {
     })
 
     for (github_package in opts[["<inpkg>"]][github_indices]) {
-      devtools::install_github(github_package)
+      splits <- strsplit(github_package, "/")[[1]]
+      if (length(splits) == 2) {
+        devtools::install_github(github_package)
+      } else if (length(splits) > 2) {
+        devtools::install_github(paste(splits[1:2], collapse = "/"), subdir = paste(splits[3:length(splits)], collapse = "/"))
+      }
     }
 
     rest_packages <- opts[["<inpkg>"]][!github_indices]
