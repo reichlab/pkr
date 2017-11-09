@@ -110,6 +110,7 @@ if (opts[["init"]]) {
         FALSE
       }
     })
+
     for (github_package in opts[["<inpkg>"]][github_indices]) {
       devtools::install_github(github_package)
     }
@@ -120,7 +121,7 @@ if (opts[["init"]]) {
       cran_indices <- !sapply(rest_packages, require, character.only = TRUE)
       rest_packages <- rest_packages[cran_indices]
       if (length(rest_packages) > 0) {
-        install.packages(rest_packages[cran_indices], repos = default_mirror)
+        install.packages(rest_packages, repos = default_mirror)
       }
     }
   }
