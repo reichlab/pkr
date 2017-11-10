@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-"pkr :: opinionated set of tools for working with R
+"pkr :: Command line package management for R based on packrat
 
 Usage:
   pkr init
@@ -109,15 +109,16 @@ setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
 #' Setup self dependencies
 self_setup <- function() {
   for (dep in c('docopt', 'packrat', 'devtools')) {
-    if (!installed(dep)) {
+    if (!installed_p(dep)) {
       install(dep)
     }
   }
 }
 
 ## Entry point
-## Use globally installed docopt
-packrat::off()
+if (installed_p('packrat')) {
+  packrat::off()
+}
 self_setup()
 opts <- docopt::docopt(doc, version = "v0.3.0")
 
