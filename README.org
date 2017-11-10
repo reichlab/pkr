@@ -1,0 +1,50 @@
+#+TITLE: pkr
+
+Command line package management for R based on [[https://rstudio.github.io/packrat/][packrat]].
+
+* Install
+
+- Put ~./pkr~ somewhere in your ~PATH~ (and give execute permissions if needed).
+- Add ~~/.pkr/bin~ to ~PATH~ if you want to use the pkr scripts feature.
+
+*  Command line
+
+#+BEGIN_SRC bash :exports both :results output
+pkr --help
+#+END_SRC
+
+#+RESULTS:
+#+begin_example
+pkr :: Command line package management for R based on packrat
+
+Usage:
+  pkr init
+  pkr (in | install) ([<inpkg>...] | [--file=<pkr-file>]) [--global]
+  pkr (rm | remove) <rmpkg>... [--global]
+  pkr status
+  pkr clean
+  pkr test
+  pkr lint
+  pkr script (in | install) <script>
+  pkr script (ls | list) <script>
+  pkr script (rm | remove) <script>
+  pkr script new <script>
+  pkr -h | --help
+  pkr -v | --version
+
+Arguments:
+  init             Initialize packrat project
+  in, install      Install packages / scripts
+  rm, remove       Remove packages / scripts
+  ls, list         List installed scripts
+  status           Show installed packages
+  clean            Remove unused packages
+  test             Run tests
+  lint             Lint *.R files
+  script           Work with Rscripts
+
+Options:
+  --global         Use global package installation location
+  -h --help        Print this help
+  -v --version     Show version number 
+#+end_example
