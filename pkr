@@ -33,10 +33,6 @@ Options:
   -h --help        Print this help
   -v --version     Show version number" -> doc
 
-## Use globally installed docopt
-packrat::off()
-opts <- docopt::docopt(doc, version = "v0.3.0")
-
 ## Don't bug me!
 default_mirror <- "http://cran.us.r-project.org"
 pkr_bin_path <- "~/.pkr/bin"
@@ -110,7 +106,21 @@ setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
   }
 }
 
+#' Setup self dependencies
+self_setup <- function() {
+  for (dep in c('docopt', 'packrat', 'devtools')) {
+    if (!installed(dep)) {
+      install(dep)
+    }
+  }
+}
+
 ## Entry point
+## Use globally installed docopt
+packrat::off()
+self_setup()
+opts <- docopt::docopt(doc, version = "v0.3.0")
+
 if (opts[["init"]]) {
   ## Run packrat init
   init_packrat()
