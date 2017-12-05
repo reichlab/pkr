@@ -49,27 +49,42 @@ check_packrat <- function() {
 
 #' Check if package_id is installed
 installed_p <- function(package_id) {
-  splits <- strsplit(package_id, "/")[[1]]
-  name <- if (length(splits) == 1) package_id else splits[2]
-  require(name, character.only = TRUE)
+  if (startsWith(package_id, "./")) {
+    ## This is a local package
+    name_line <- Find(function(l) {
+      startsWith(l, "Package:")
+    }, readLines(file.path(package_id, "DESCRIPTION"), encoding = "UTF8"))
+
+    require(trimws(strsplit(name_line, ":")[[1]][2]), character.only = TRUE)
+  }
+  else {
+    splits <- strsplit(package_id, "/")[[1]]
+    name <- if (length(splits) == 1) package_id else splits[2]
+    require(name, character.only = TRUE)
+  }
 }
 
 #' Install package given as pkr style package id
 install <- function(package_id) {
-  splits <- strsplit(package_id, "/")[[1]]
+  if (startsWith(package_id, "./")) {
+    devtools::install_local(package_id)
+  }
+  else {
+    splits <- strsplit(package_id, "/")[[1]]
 
-  if (length(splits) == 1) {
-    ## This is plain CRAN package
-    install.packages(package_id, repos = default_mirror)
-  } else if (length(splits) == 2) {
-    ## gh package of type user/repo
-    devtools::install_github(package_id)
-  } else {
-    ## gh package of type user/repo/sub/dir
-    devtools::install_github(
-                paste(splits[1:2], collapse = "/"),
-                subdir = paste(splits[3:length(splits)], collapse = "/")
-              )
+    if (length(splits) == 1) {
+      ## This is plain CRAN package
+      install.packages(package_id, repos = default_mirror)
+    } else if (length(splits) == 2) {
+      ## gh package of type user/repo
+      devtools::install_github(package_id)
+    } else {
+      ## gh package of type user/repo/sub/dir
+      devtools::install_github(
+                  paste(splits[1:2], collapse = "/"),
+                  subdir = paste(splits[3:length(splits)], collapse = "/")
+                )
+    }
   }
 }
 
@@ -120,7 +135,7 @@ if (installed_p('packrat')) {
   packrat::off()
 }
 self_setup()
-opts <- docopt::docopt(doc, version = "v0.3.0")
+opts <- docopt::docopt(doc, version = "v0.3.1")
 
 if (opts[["init"]]) {
   ## Run packrat init
