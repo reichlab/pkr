@@ -10,10 +10,10 @@ Usage:
   pkr clean
   pkr test
   pkr lint
-  pkr script (in | install) <script>
-  pkr script (ls | list) <script>
-  pkr script (rm | remove) <script>
-  pkr script new <script>
+  pkr script-install <script>
+  pkr script-list
+  pkr script-remove <script>
+  pkr script-new <script>
   pkr -h | --help
   pkr -v | --version
 
@@ -26,7 +26,6 @@ Arguments:
   clean            Remove unused packages
   test             Run tests
   lint             Lint *.R files
-  script           Work with Rscripts
 
 Options:
   --global         Use global package installation location
@@ -63,7 +62,9 @@ get_package_name <- function(package_id) {
 
 #' Check if package_id is installed
 installed_p <- function(package_id) {
-  require((get_package_name(package_id)), character.only = TRUE)
+  require((get_package_name(package_id)),
+          character.only = TRUE, quietly = TRUE,
+          warn.conflicts = FALSE)
 }
 
 #' Install package given as pkr style package id
@@ -123,10 +124,6 @@ setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
   if (!dir.exists(pkr_bin)) {
     cat("pkr:: Setting up pkr bin directory...\n")
     dir.create(pkr_bin, showWarnings = FALSE, recursive = TRUE)
-    oldwd <- getwd()
-    setwd(pkr_bin_path)
-    init_packrat()
-    setwd(oldwd)
   }
 }
 
@@ -144,7 +141,7 @@ opts <- docopt::docopt(doc, version = "v0.3.1")
 
 if (opts[["init"]]) {
   init_packrat()
-} else if (opts[["in"]] | opts[["install"]]) {
+} else if (opts[["in"]] || opts[["install"]]) {
 
   if(length(opts[["--file"]]) == 1) {
     to_install <- read_package_ids_from_file(opts[["--file"]])
@@ -169,7 +166,7 @@ if (opts[["init"]]) {
     sapply(to_install[!sapply(to_install, installed_p)], install)
   }
 
- } else if (opts[["rm"]] | opts[["remove"]]) {
+ } else if (opts[["rm"]] || opts[["remove"]]) {
   if (opts[["--global"]]) {
     packrat::off()
     cat("pkr:: Using global path\n")
@@ -189,8 +186,10 @@ if (opts[["init"]]) {
 } else if (opts[["test"]]) {
   check_and_install("testthat")
   system("R CMD check")
-} else if (opts[["create"]]) {
+} else if (opts[["script-new"]]) {
+  setup_pkr_bin()
   name <- opts[["<script>"]]
+  target_file <- file.path(pkr_bin_path, name)
   stub <- c(
     "#!/usr/bin/env Rscript",
     "",
@@ -198,23 +197,29 @@ if (opts[["init"]]) {
     "",
     "opts <- docopt::docopt(doc)"
   )
-  writeLines(stub, name)
-} else if (opts[["save"]]) {
-  ## Save the given script as an executable
+  writeLines(stub, target_file)
+  Sys.chmod(target_file, mode = "755")
+  cat(paste0("pkr:: Created new script at ", target_file, "\n"))
+} else if (opts[["script-install"]]) {
   setup_pkr_bin()
-
   source_file <- opts[["<script>"]]
-  script_name <- basename(source_file)
+  script_name <- gsub(".R$", "", basename(source_file))
   target_file <- file.path(pkr_bin_path, script_name)
+  cat(paste0("pkr:: Setting up ", target_file, "\n"))
   file.copy(from = source_file, to = target_file, overwrite = TRUE)
   Sys.chmod(target_file, mode = "755")
-
-  ## Create symlink for short name
   setwd(pkr_bin_path)
-  short_name <- sub("^([^.]*).*", "\\1", script_name)
-  if (!file.exists(short_name)) {
-    file.symlink(source_file, short_name)
-  }
-  ## Install deps
   init_packrat()
+} else if (opts[["script-remove"]]) {
+  setup_pkr_bin()
+  target_file <- file.path(pkr_bin_path, opts[["<script>"]])
+  unlink(target_file)
+} else if (opts[["script-list"]]) {
+  setup_pkr_bin()
+  scripts <- list.files(pkr_bin_path)
+
+  cat(paste0("pkr:: ", length(scripts), " installed packages\n"))
+  sapply(scripts, function(name) {
+    cat(paste("• ", name, "\n"))
+  })
 }
