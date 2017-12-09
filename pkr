@@ -67,7 +67,7 @@ installed_p <- function(package_id) {
 
 #' Install package given as pkr style package id
 install <- function(package_id) {
-  if (startsWith(package_id, "./")) {
+  if (startsWith(package_id, ".")) {
     cat(paste0("pkr:: Installing local package ",
                get_package_name(package_id), "\n"))
     devtools::install(package_id, quiet = TRUE)
