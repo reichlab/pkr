@@ -62,9 +62,7 @@ get_package_name <- function(package_id) {
 
 #' Check if package_id is installed
 installed_p <- function(package_id) {
-  suppressMessages(require(get_package_name(package_id),
-                           character.only = TRUE, quietly = TRUE,
-                           warn.conflicts = FALSE))
+  requireNamespace(get_package_name(package_id), quietly = TRUE)
 }
 
 #' Install package given as pkr style package id
