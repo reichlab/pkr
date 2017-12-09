@@ -47,7 +47,7 @@ check_packrat <- function() {
 }
 
 get_package_name <- function(package_id) {
-  if (startsWith(package_id, "./")) {
+  if (startsWith(package_id, ".")) {
     ## This is a local package
     name_line <- Find(function(l) {
       startsWith(l, "Package:")
