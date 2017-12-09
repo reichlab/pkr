@@ -222,8 +222,8 @@ if (opts[["init"]]) {
   setup_pkr_bin()
   scripts <- list.files(pkr_bin_path)
 
-  cat(paste0("pkr:: ", length(scripts), " installed packages\n"))
+  cat(paste0("pkr:: ", length(scripts), " installed scripts\n"))
   for (name in scripts) {
-    cat(paste0("• ", name, "\n"))
+    cat(paste0("⚫ ", name, "\n"))
   }
 }
