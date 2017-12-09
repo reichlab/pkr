@@ -62,9 +62,9 @@ get_package_name <- function(package_id) {
 
 #' Check if package_id is installed
 installed_p <- function(package_id) {
-  require((get_package_name(package_id)),
-          character.only = TRUE, quietly = TRUE,
-          warn.conflicts = FALSE)
+  suppressMessages(require(get_package_name(package_id),
+                           character.only = TRUE, quietly = TRUE,
+                           warn.conflicts = FALSE))
 }
 
 #' Install package given as pkr style package id
@@ -72,7 +72,7 @@ install <- function(package_id) {
   if (startsWith(package_id, "./")) {
     cat(paste0("pkr:: Installing local package ",
                get_package_name(package_id), "\n"))
-    devtools::install(package_id)
+    devtools::install(package_id, quiet = TRUE)
   }
   else {
     splits <- strsplit(package_id, "/")[[1]]
@@ -81,19 +81,20 @@ install <- function(package_id) {
       ## This is plain CRAN package
       cat(paste0("pkr:: Installing CRAN package ",
                  get_package_name(package_id), "\n"))
-      install.packages(package_id, repos = default_mirror)
+      install.packages(package_id, repos = default_mirror, quiet = TRUE)
     } else if (length(splits) == 2) {
       cat(paste0("pkr:: Installing github package ",
                  get_package_name(package_id), "\n"))
       ## gh package of type user/repo
-      devtools::install_github(package_id)
+      devtools::install_github(package_id, quiet = TRUE)
     } else {
       cat(paste0("pkr:: Installing github package ",
                  get_package_name(package_id), "\n"))
       ## gh package of type user/repo/sub/dir
       devtools::install_github(
                   paste(splits[1:2], collapse = "/"),
-                  subdir = paste(splits[3:length(splits)], collapse = "/")
+                  subdir = paste(splits[3:length(splits)], collapse = "/"),
+                  quiet = TRUE
                 )
     }
   }
@@ -224,6 +225,6 @@ if (opts[["init"]]) {
 
   cat(paste0("pkr:: ", length(scripts), " installed scripts\n"))
   for (name in scripts) {
-    cat(paste0("⚫ ", name, "\n"))
+    cat(paste0("  - ", name, "\n"))
   }
 }
