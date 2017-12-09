@@ -129,7 +129,9 @@ setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
 
 #' Setup self dependencies
 self_setup <- function() {
-  sapply(c("docopt", "packrat", "devtools"), check_and_install)
+  for (package_id in c("docopt", "packrat", "devtools")) {
+    check_and_install(package_id)
+  }
 }
 
 ## Entry point
@@ -163,7 +165,9 @@ if (opts[["init"]]) {
   if (length(to_install) == 0) {
     init_packrat()
   } else {
-    sapply(to_install[!sapply(to_install, installed_p)], install)
+    for (package_id in to_install[!sapply(to_install, installed_p)]) {
+      install(package_id)
+    }
   }
 
  } else if (opts[["rm"]] || opts[["remove"]]) {
@@ -219,7 +223,7 @@ if (opts[["init"]]) {
   scripts <- list.files(pkr_bin_path)
 
   cat(paste0("pkr:: ", length(scripts), " installed packages\n"))
-  sapply(scripts, function(name) {
-    cat(paste("• ", name, "\n"))
-  })
+  for (name in scripts) {
+    cat(paste0("• ", name, "\n"))
+  }
 }
