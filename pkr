@@ -71,7 +71,7 @@ install <- function(package_id) {
   if (startsWith(package_id, "./")) {
     cat(paste0("pkr:: Installing local package ",
                get_package_name(package_id), "\n"))
-    devtools::install_local(package_id)
+    devtools::install(package_id)
   }
   else {
     splits <- strsplit(package_id, "/")[[1]]
