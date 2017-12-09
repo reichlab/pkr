@@ -1,11 +1,11 @@
 #+TITLE: pkr
 
-Command line package management for R based on [[https://rstudio.github.io/packrat/][packrat]].
+Command line package/script management for R based on [[https://rstudio.github.io/packrat/][packrat]].
 
 * Install
 
 - Put ~./pkr~ somewhere in your ~PATH~ (and give execute permissions if needed).
-- Add ~~/.pkr/bin~ to ~PATH~ if you want to use the pkr scripts feature.
+- Add ~$HOME/.pkr/bin~ to ~PATH~ if you want to use the pkr's script feature.
 
 *  Command line
 
@@ -25,10 +25,10 @@ Usage:
   pkr clean
   pkr test
   pkr lint
-  pkr script (in | install) <script>
-  pkr script (ls | list) <script>
-  pkr script (rm | remove) <script>
-  pkr script new <script>
+  pkr script-install <script>
+  pkr script-list
+  pkr script-remove <script>
+  pkr script-new <script>
   pkr -h | --help
   pkr -v | --version
 
@@ -41,7 +41,6 @@ Arguments:
   clean            Remove unused packages
   test             Run tests
   lint             Lint *.R files
-  script           Work with Rscripts
 
 Options:
   --global         Use global package installation location
