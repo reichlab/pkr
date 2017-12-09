@@ -64,7 +64,7 @@ get_package_name <- function(package_id) {
 
 #' Check if package_id is installed
 installed_p <- function(package_id) {
-  requireNamespace(get_package_name(package_id), quietly = TRUE)
+  requireNamespace(get_package_name(package_id), quietly = !debug)
 }
 
 #' Install package given as pkr style package id
@@ -72,7 +72,7 @@ install <- function(package_id) {
   if (startsWith(package_id, ".")) {
     cat(paste0("pkr:: Installing local package ",
                get_package_name(package_id), "\n"))
-    devtools::install(package_id, quiet = TRUE)
+    devtools::install(package_id, quiet = !debug)
   }
   else {
     splits <- strsplit(package_id, "/")[[1]]
@@ -81,12 +81,12 @@ install <- function(package_id) {
       ## This is plain CRAN package
       cat(paste0("pkr:: Installing CRAN package ",
                  get_package_name(package_id), "\n"))
-      install.packages(package_id, repos = default_mirror, quiet = TRUE)
+      install.packages(package_id, repos = default_mirror, quiet = !debug)
     } else if (length(splits) == 2) {
       cat(paste0("pkr:: Installing github package ",
                  get_package_name(package_id), "\n"))
       ## gh package of type user/repo
-      devtools::install_github(package_id, quiet = TRUE)
+      devtools::install_github(package_id, quiet = !debug)
     } else {
       cat(paste0("pkr:: Installing github package ",
                  get_package_name(package_id), "\n"))
@@ -94,7 +94,7 @@ install <- function(package_id) {
       devtools::install_github(
                   paste(splits[1:2], collapse = "/"),
                   subdir = paste(splits[3:length(splits)], collapse = "/"),
-                  quiet = TRUE
+                  quiet = !debug
                 )
     }
   }
@@ -142,7 +142,7 @@ if (installed_p("packrat")) {
 self_setup()
 opts <- docopt::docopt(doc, version = "v0.4.2")
 
-debug <- opts[["--debug"]]
+debug <- opts[["--verbose"]]
 
 if (opts[["init"]]) {
   init_packrat()
