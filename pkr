@@ -47,26 +47,31 @@ check_packrat <- function() {
   }
 }
 
-#' Check if package_id is installed
-installed_p <- function(package_id) {
+get_package_name <- function(package_id) {
   if (startsWith(package_id, "./")) {
     ## This is a local package
     name_line <- Find(function(l) {
       startsWith(l, "Package:")
     }, readLines(file.path(package_id, "DESCRIPTION"), encoding = "UTF8"))
 
-    require(trimws(strsplit(name_line, ":")[[1]][2]), character.only = TRUE)
-  }
-  else {
+    trimws(strsplit(package_id, ":")[[1]][2])
+  } else {
+    ## This is either github or cran package
     splits <- strsplit(package_id, "/")[[1]]
-    name <- if (length(splits) == 1) package_id else splits[2]
-    require(name, character.only = TRUE)
+    if (length(splits) == 1) package_id else splits[length(splits)]
   }
+}
+
+#' Check if package_id is installed
+installed_p <- function(package_id) {
+  require((get_package_name(package_id)), character.only = TRUE)
 }
 
 #' Install package given as pkr style package id
 install <- function(package_id) {
   if (startsWith(package_id, "./")) {
+    cat(paste0("pkr:: Installing local package ",
+               get_package_name(package_id), "\n"))
     devtools::install_local(package_id)
   }
   else {
@@ -74,11 +79,17 @@ install <- function(package_id) {
 
     if (length(splits) == 1) {
       ## This is plain CRAN package
+      cat(paste0("pkr:: Installing CRAN package ",
+                 get_package_name(package_id), "\n"))
       install.packages(package_id, repos = default_mirror)
     } else if (length(splits) == 2) {
+      cat(paste0("pkr:: Installing github package ",
+                 get_package_name(package_id), "\n"))
       ## gh package of type user/repo
       devtools::install_github(package_id)
     } else {
+      cat(paste0("pkr:: Installing github package ",
+                 get_package_name(package_id), "\n"))
       ## gh package of type user/repo/sub/dir
       devtools::install_github(
                   paste(splits[1:2], collapse = "/"),
@@ -91,7 +102,6 @@ install <- function(package_id) {
 #' Install package if not found
 check_and_install <- function(package_id) {
   if (!installed_p(package_id)) {
-    cat(paste0(package_id, " not found. Installing...\n"))
     install(package_id)
   }
 }
@@ -112,7 +122,7 @@ init_packrat <- function() {
 #' Setup bin directory for scripts
 setup_pkr_bin <- function(pkr_bin = pkr_bin_path) {
   if (!dir.exists(pkr_bin)) {
-    cat("Setting up pkr bin directory...\n")
+    cat("pkr:: Setting up pkr bin directory...\n")
     dir.create(pkr_bin, showWarnings = FALSE, recursive = TRUE)
     oldwd <- getwd()
     setwd(pkr_bin_path)
@@ -146,7 +156,7 @@ if (opts[["init"]]) {
   ## Install given packages
   if (opts[["--global"]]) {
     packrat::off()
-    cat("Using global path\n")
+    cat("pkr:: Using global path\n")
     if (length(to_install) == 0) {
       stop("Provide at least one package")
     }
@@ -163,7 +173,7 @@ if (opts[["init"]]) {
  } else if (opts[["rm"]] | opts[["remove"]]) {
   if (opts[["--global"]]) {
     packrat::off()
-    cat("Using global path\n")
+    cat("pkr:: Using global path\n")
   } else {
     check_packrat()
   }
