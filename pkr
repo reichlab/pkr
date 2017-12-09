@@ -140,7 +140,7 @@ if (installed_p("packrat")) {
   packrat::off()
 }
 self_setup()
-opts <- docopt::docopt(doc, version = "v0.3.1")
+opts <- docopt::docopt(doc, version = "v0.4.0")
 
 if (opts[["init"]]) {
   init_packrat()
