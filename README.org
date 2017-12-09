@@ -18,17 +18,17 @@ pkr --help
 pkr :: Command line package management for R based on packrat
 
 Usage:
-  pkr init
-  pkr (in | install) ([<inpkg>...] | [--file=<pkr-file>]) [--global]
-  pkr (rm | remove) <rmpkg>... [--global]
-  pkr status
-  pkr clean
-  pkr test
-  pkr lint
-  pkr script-install <script>
-  pkr script-list
-  pkr script-remove <script>
-  pkr script-new <script>
+  pkr init [--verbose]
+  pkr (in | install) ([<inpkg>...] | [--file=<pkr-file>]) [--global] [--verbose]
+  pkr (rm | remove) <rmpkg>... [--global] [--verbose]
+  pkr status [--verbose]
+  pkr clean [--verbose]
+  pkr test [--verbose]
+  pkr lint [--verbose]
+  pkr script-install <script> [--verbose]
+  pkr script-list [--verbose]
+  pkr script-remove <script> [--verbose]
+  pkr script-new <script> [--verbose]
   pkr -h | --help
   pkr -v | --version
 
@@ -44,6 +44,7 @@ Arguments:
 
 Options:
   --global         Use global package installation location
+  --verbose        Don't suppress output
   -h --help        Print this help
   -v --version     Show version number 
 #+end_example
