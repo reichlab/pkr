@@ -53,8 +53,7 @@ get_package_name <- function(package_id) {
     name_line <- Find(function(l) {
       startsWith(l, "Package:")
     }, readLines(file.path(package_id, "DESCRIPTION"), encoding = "UTF8"))
-
-    trimws(strsplit(package_id, ":")[[1]][2])
+    trimws(strsplit(name_line, ":")[[1]][2])
   } else {
     ## This is either github or cran package
     splits <- strsplit(package_id, "/")[[1]]
