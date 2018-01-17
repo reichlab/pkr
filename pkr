@@ -110,7 +110,7 @@ check_and_install <- function(package_id) {
 #' Get package ids from a file (allows # style comments)
 read_package_ids_from_file <- function(file_name) {
   lines <- readLines(file_name)
-  Filter(function(x) (length(x) == 0) || (!startsWith(x, "#")), lines)
+  Filter(function(x) (nchar(x) > 0) && (!startsWith(x, "#")), lines)
 }
 
 #' Initialize packrat repo with speed-ish settings
