@@ -15,6 +15,7 @@ Usage:
   pkr script-remove <script> [--verbose]
   pkr script-new <script> [--verbose]
   pkr self check-update
+  pkr self update
   pkr -h | --help
   pkr -v | --version
 
@@ -47,6 +48,14 @@ check_new_version <- function() {
   version_line <- grep("^version", readLines(destfile), value = TRUE)
   new_version <- gsub("version\ *<-\ *", "", version_line)
   gsub("\"", "", new_version)
+}
+
+self_update <- function() {
+  argv <- commandArgs(trailingOnly = FALSE)
+  base_dir <- dirname(substring(argv[grep("--file=", argv)], 8))
+  destfile <- file.path(base_dir, "pkr")
+  download.file(update_url, destfile)
+  Sys.chmod(destfile, mode = "755")
 }
 
 #' Check if in a packrat project, exit if not
@@ -249,5 +258,7 @@ if (opts[["init"]]) {
     } else {
       cat(sprintf("Available version %s (running version %s)\n", new_version, version))
     }
+  } else if (opts[["update"]]) {
+    self_update()
   }
 }
