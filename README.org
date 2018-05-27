@@ -29,6 +29,7 @@ Usage:
   pkr script-list [--verbose]
   pkr script-remove <script> [--verbose]
   pkr script-new <script> [--verbose]
+  pkr self check-update
   pkr -h | --help
   pkr -v | --version
 
@@ -46,5 +47,5 @@ Options:
   --global         Use global package installation location
   --verbose        Don't suppress output
   -h --help        Print this help
-  -v --version     Show version number 
+  -v --version     Show version number
 #+end_example
