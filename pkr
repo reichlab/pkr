@@ -37,6 +37,7 @@ Options:
 default_mirror <- "http://cran.us.r-project.org"
 pkr_bin_path <- "~/.pkr/bin"
 debug <- FALSE
+version <- "v0.4.4"
 
 #' Check if in a packrat project, exit if not
 #' Turn on packrat mode
@@ -140,7 +141,7 @@ if (installed_p("packrat")) {
   packrat::off()
 }
 self_setup()
-opts <- docopt::docopt(doc, version = "v0.4.4")
+opts <- docopt::docopt(doc, version = version)
 
 debug <- opts[["--verbose"]]
 
