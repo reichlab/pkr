@@ -39,7 +39,7 @@ default_mirror <- "http://cran.us.r-project.org"
 update_url <- "https://raw.githubusercontent.com/reichlab/pkr/master/pkr"
 pkr_bin_path <- "~/.pkr/bin"
 debug <- FALSE
-version <- "v0.4.4"
+version <- "v0.4.5"
 
 check_new_version <- function() {
   destfile <- tempfile()
