@@ -14,6 +14,7 @@ Usage:
   pkr script-list [--verbose]
   pkr script-remove <script> [--verbose]
   pkr script-new <script> [--verbose]
+  pkr self check-update
   pkr -h | --help
   pkr -v | --version
 
@@ -35,9 +36,18 @@ Options:
 
 ## Don't bug me!
 default_mirror <- "http://cran.us.r-project.org"
+update_url <- "https://raw.githubusercontent.com/reichlab/pkr/master/pkr"
 pkr_bin_path <- "~/.pkr/bin"
 debug <- FALSE
 version <- "v0.4.4"
+
+check_new_version <- function() {
+  destfile <- tempfile()
+  download.file(update_url, destfile, quiet = TRUE)
+  version_line <- grep("^version", readLines(destfile), value = TRUE)
+  new_version <- gsub("version\ *<-\ *", "", version_line)
+  gsub("\"", "", new_version)
+}
 
 #' Check if in a packrat project, exit if not
 #' Turn on packrat mode
@@ -229,5 +239,15 @@ if (opts[["init"]]) {
   cat(paste0("pkr:: ", length(scripts), " installed scripts\n"))
   for (name in scripts) {
     cat(paste0("  - ", name, "\n"))
+  }
+} else if (opts[["self"]]) {
+  if (opts[["check-update"]]) {
+    new_version <- check_new_version()
+
+    if (new_version == version) {
+      cat(sprintf("Up to date (running version %s)\n", version))
+    } else {
+      cat(sprintf("Available version %s (running version %s)\n", new_version, version))
+    }
   }
 }
