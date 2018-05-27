@@ -204,11 +204,9 @@ if (opts[["init"]]) {
     setwd(pkr_bin_path)
     init_packrat()
   } else if (opts[["remove"]]) {
-    setup_pkr_bin()
     target_file <- file.path(pkr_bin_path, opts[["<script>"]])
     unlink(target_file)
   } else if (opts[["list"]]) {
-    setup_pkr_bin()
     scripts <- list.files(pkr_bin_path)
 
     cat(paste0("pkr:: ", length(scripts), " installed scripts\n"))
