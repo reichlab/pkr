@@ -25,11 +25,12 @@ Usage:
   pkr clean [--verbose]
   pkr test [--verbose]
   pkr lint [--verbose]
-  pkr script-install <script> [--verbose]
-  pkr script-list [--verbose]
-  pkr script-remove <script> [--verbose]
-  pkr script-new <script> [--verbose]
+  pkr script install <script> [--verbose]
+  pkr script list [--verbose]
+  pkr script remove <script> [--verbose]
+  pkr script new <script> [--verbose]
   pkr self check-update
+  pkr self update
   pkr -h | --help
   pkr -v | --version
 

@@ -10,10 +10,10 @@ Usage:
   pkr clean [--verbose]
   pkr test [--verbose]
   pkr lint [--verbose]
-  pkr script-install <script> [--verbose]
-  pkr script-list [--verbose]
-  pkr script-remove <script> [--verbose]
-  pkr script-new <script> [--verbose]
+  pkr script install <script> [--verbose]
+  pkr script list [--verbose]
+  pkr script remove <script> [--verbose]
+  pkr script new <script> [--verbose]
   pkr self check-update
   pkr self update
   pkr -h | --help
@@ -40,7 +40,7 @@ default_mirror <- "http://cran.us.r-project.org"
 update_url <- "https://raw.githubusercontent.com/reichlab/pkr/master/pkr"
 pkr_bin_path <- "~/.pkr/bin"
 debug <- FALSE
-version <- "v0.4.5"
+version <- "v0.5.0"
 
 check_new_version <- function() {
   destfile <- tempfile()
@@ -166,6 +166,56 @@ debug <- opts[["--verbose"]]
 
 if (opts[["init"]]) {
   init_packrat()
+} else if (opts[["self"]]) {
+  if (opts[["check-update"]]) {
+    new_version <- check_new_version()
+
+    if (new_version == version) {
+      cat(sprintf("Up to date (running version %s)\n", version))
+    } else {
+      cat(sprintf("Available version %s (running version %s)\n", new_version, version))
+    }
+  } else if (opts[["update"]]) {
+    self_update()
+  }
+} else if (opts[["script"]]) {
+  setup_pkr_bin()
+
+  if (opts[["new"]]) {
+    name <- opts[["<script>"]]
+    target_file <- file.path(pkr_bin_path, name)
+    stub <- c(
+      "#!/usr/bin/env Rscript",
+      "",
+      paste("\"usage:", name, "\" -> doc"),
+      "",
+      "opts <- docopt::docopt(doc)"
+    )
+    writeLines(stub, target_file)
+    Sys.chmod(target_file, mode = "755")
+    cat(paste0("pkr:: Created new script at ", target_file, "\n"))
+  } else if (opts[["install"]]) {
+    source_file <- opts[["<script>"]]
+    script_name <- gsub(".R$", "", basename(source_file))
+    target_file <- file.path(pkr_bin_path, script_name)
+    cat(paste0("pkr:: Setting up ", target_file, "\n"))
+    file.copy(from = source_file, to = target_file, overwrite = TRUE)
+    Sys.chmod(target_file, mode = "755")
+    setwd(pkr_bin_path)
+    init_packrat()
+  } else if (opts[["remove"]]) {
+    setup_pkr_bin()
+    target_file <- file.path(pkr_bin_path, opts[["<script>"]])
+    unlink(target_file)
+  } else if (opts[["list"]]) {
+    setup_pkr_bin()
+    scripts <- list.files(pkr_bin_path)
+
+    cat(paste0("pkr:: ", length(scripts), " installed scripts\n"))
+    for (name in scripts) {
+      cat(paste0("  - ", name, "\n"))
+    }
+  }
 } else if (opts[["in"]] || opts[["install"]]) {
 
   if(length(opts[["--file"]]) == 1) {
@@ -193,7 +243,7 @@ if (opts[["init"]]) {
     }
   }
 
- } else if (opts[["rm"]] || opts[["remove"]]) {
+} else if (opts[["rm"]] || opts[["remove"]]) {
   if (opts[["--global"]]) {
     packrat::off()
     cat("pkr:: Using global path\n")
@@ -213,52 +263,4 @@ if (opts[["init"]]) {
 } else if (opts[["test"]]) {
   check_and_install("testthat")
   system("R CMD check")
-} else if (opts[["script-new"]]) {
-  setup_pkr_bin()
-  name <- opts[["<script>"]]
-  target_file <- file.path(pkr_bin_path, name)
-  stub <- c(
-    "#!/usr/bin/env Rscript",
-    "",
-    paste("\"usage:", name, "\" -> doc"),
-    "",
-    "opts <- docopt::docopt(doc)"
-  )
-  writeLines(stub, target_file)
-  Sys.chmod(target_file, mode = "755")
-  cat(paste0("pkr:: Created new script at ", target_file, "\n"))
-} else if (opts[["script-install"]]) {
-  setup_pkr_bin()
-  source_file <- opts[["<script>"]]
-  script_name <- gsub(".R$", "", basename(source_file))
-  target_file <- file.path(pkr_bin_path, script_name)
-  cat(paste0("pkr:: Setting up ", target_file, "\n"))
-  file.copy(from = source_file, to = target_file, overwrite = TRUE)
-  Sys.chmod(target_file, mode = "755")
-  setwd(pkr_bin_path)
-  init_packrat()
-} else if (opts[["script-remove"]]) {
-  setup_pkr_bin()
-  target_file <- file.path(pkr_bin_path, opts[["<script>"]])
-  unlink(target_file)
-} else if (opts[["script-list"]]) {
-  setup_pkr_bin()
-  scripts <- list.files(pkr_bin_path)
-
-  cat(paste0("pkr:: ", length(scripts), " installed scripts\n"))
-  for (name in scripts) {
-    cat(paste0("  - ", name, "\n"))
-  }
-} else if (opts[["self"]]) {
-  if (opts[["check-update"]]) {
-    new_version <- check_new_version()
-
-    if (new_version == version) {
-      cat(sprintf("Up to date (running version %s)\n", version))
-    } else {
-      cat(sprintf("Available version %s (running version %s)\n", new_version, version))
-    }
-  } else if (opts[["update"]]) {
-    self_update()
-  }
 }
