@@ -16,6 +16,7 @@ Usage:
   pkr script new <script> [--verbose]
   pkr self check-update
   pkr self update
+  pkr pkg list [--dir=<list-dir>]
   pkr -h | --help
   pkr -v | --version
 
@@ -31,6 +32,7 @@ Arguments:
 
 Options:
   --global         Use global package installation location
+  --dir=<list-dir> Directory to list packages for [default: ./]
   --verbose        Don't suppress output
   -h --help        Print this help
   -v --version     Show version number" -> doc
@@ -59,6 +61,23 @@ self_update <- function() {
   destfile <- file.path(base_dir, "pkr")
   download.file(update_url, destfile)
   Sys.chmod(destfile, mode = "755")
+}
+
+#' Return all packages used in the file
+packages_in_file <- function(f) {
+  lines <- readLines(f)
+  pkgs <- sapply(lines, function (l) regmatches(l, regexec("library\\(\"?(\\S*)\"?\\)", l))[[1]][2])
+  Filter(Negate(is.na), unname(pkgs))
+}
+
+#' List all the R packages used in given path
+list_packages <- function(path = "./") {
+  files <- list.files(path, pattern = "\\.(R|Rmd|Rnw)$",
+                      ignore.case = TRUE, include.dirs = FALSE,
+                      recursive = TRUE)
+
+  files <- files[-grep("packrat/", files)]
+  sort(unique(Reduce(c, sapply(files, function (f) packages_in_file(file.path(path, f))), vector())))
 }
 
 #' Check if in a packrat project, exit if not
@@ -169,6 +188,10 @@ debug <- opts[["--verbose"]]
 
 if (opts[["init"]]) {
   init_packrat()
+} else if (opts[["pkg"]]) {
+  if (opts[["list"]]) {
+    cat(list_packages(opts[["--dir"]]), sep = "\n")
+  }
 } else if (opts[["self"]]) {
   if (opts[["check-update"]]) {
     new_version <- check_new_version()
