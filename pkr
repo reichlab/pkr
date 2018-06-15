@@ -42,6 +42,7 @@ pkr_bin_path <- "~/.pkr/bin"
 debug <- FALSE
 version <- "v0.5.0"
 
+#' Check versions
 check_new_version <- function() {
   destfile <- tempfile()
   download.file(update_url, destfile, quiet = TRUE)
@@ -50,6 +51,8 @@ check_new_version <- function() {
   gsub("\"", "", new_version)
 }
 
+#' Update the currently running script
+#' This might need sudo if the running pkr is in a sudo-ish location
 self_update <- function() {
   argv <- commandArgs(trailingOnly = FALSE)
   base_dir <- dirname(substring(argv[grep("--file=", argv)], 8))
