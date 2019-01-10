@@ -204,7 +204,7 @@ if (opts[["init"]]) {
   } else if (opts[["update"]]) {
     self_update()
   }
-} else if (opts[["script"]]) {
+} else if (!is.null(opts[["script"]])) {
   setup_pkr_bin()
 
   if (opts[["new"]]) {
